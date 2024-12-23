@@ -1,3 +1,5 @@
+import Button from './UI/Button';
+
 import logoImg from '../assets/logo.jpg'
 
 function Header(){
@@ -8,9 +10,11 @@ function Header(){
 				<h1>ReactFood</h1>
 			</div>
 			<nav>
-				<button>
+				<Button
+					textOnly
+				>
 					Cart (0)
-				</button>
+				</Button>
 			</nav>
 		</header>
 	)
