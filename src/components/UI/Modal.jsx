@@ -7,6 +7,11 @@ function Modal({ children, open, className = ''}){
 
 	// ensure dialog is opened programatically so backdrop shows
 	useEffect(() => {
+		// store ref in temp value;
+		// clean-up will run later than effect fx
+		// value store in ref could theoretically change in
+		// between fx executions; lock-in value
+		// with temp variable
 		const modal = dialog.current;
 		
 		if (open) {
