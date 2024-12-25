@@ -17,17 +17,39 @@ function Checkout(){
 	function handleCheckoutClose(){
 		hideCheckout();
 	}
+
+	function handleFormSubmit(event){
+		event.preventDefault();
+
+		const fd = new FormData(event.target);
+
+		// returns {name: entered name}
+		const customerData = Object.fromEntries(fd.entries());
+
+		const response = fetch('http://localhost:3000/orders', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				order: {
+					items: items,
+					customer: customerData
+				}
+			})
+		})
+	}
 	
 	return (
 		<Modal 
 			open={progress === 'checkout'}
 			onClose={handleCheckoutClose}>
-			<form>
+			<form onSubmit={handleFormSubmit}>
 				<h2>Checkout</h2>
 				<Input 
 					labelText="Full Name"
 					type="text"
-					id="full-name"
+					id="name"
 				/>
 				<Input 
 					labelText="Email Address"
