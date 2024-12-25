@@ -8,7 +8,7 @@ import Button from './UI/Button';
 
 function Cart(){
 	const { items } = use(CartContext);
-	const { progress, hideCart } = use(UserProgressContext);
+	const { progress, hideCart, showCheckout } = use(UserProgressContext);
  
 	const cartTotal = items.reduce((totalPrice, item) => 
 		totalPrice + item.price * item.quantity, 0
@@ -18,10 +18,15 @@ function Cart(){
 		hideCart();
 	}
 
+	function handleGoToCheckout(){
+		showCheckout();
+	}
+
 	return (
 		<Modal
 			className='cart'
 			open={progress === 'cart'}
+			onClose={progress === 'cart' ? handleCartClose : null}
 		>
 			<h2>Your Cart</h2>
 			<ul>
@@ -42,11 +47,12 @@ function Cart(){
 				>
 						Close
 				</Button>
-				<Button
-					onClick={handleCartClose}
-				>
-					Go to Checkout
-				</Button>
+				{(items.length !== 0) &&
+					<Button
+						onClick={handleGoToCheckout} 
+					>
+						Go to Checkout
+					</Button>}
 			</p>
 		</Modal>
 	)

@@ -1,0 +1,10 @@
+function Input({labelText, id, ...props}){
+	return (
+		<p className="control">
+			<label htmlFor={id}>{labelText}</label>
+			<input id={id} name={id} required {...props}/>
+		</p>
+	)	
+}
+
+export default Input;
