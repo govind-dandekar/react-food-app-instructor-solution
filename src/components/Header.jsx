@@ -1,8 +1,16 @@
-import Button from './UI/Button';
+import { use } from 'react';
 
+import Button from './UI/Button';
+import { CartContext } from '../store/CartContext';
 import logoImg from '../assets/logo.jpg'
 
 function Header(){
+
+	const { items } = use(CartContext);
+
+	const cartQuantitySum = items.reduce((accumulator, item) => 
+			accumulator + item.quantity, 0)
+		
 	return (
 		<header id="main-header">
 			<div id="title">
@@ -13,7 +21,7 @@ function Header(){
 				<Button
 					textOnly
 				>
-					Cart (0)
+					Cart ({cartQuantitySum})
 				</Button>
 			</nav>
 		</header>

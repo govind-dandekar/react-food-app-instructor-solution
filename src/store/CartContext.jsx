@@ -1,6 +1,6 @@
 import { createContext, useReducer } from "react";
 
-const CartContext = createContext({
+export const CartContext = createContext({
 	items: [],
 	addItem: (item) => {},
 	removeItem: (id) => {}
@@ -26,8 +26,15 @@ function cartReducer(state, action){
 				...existingItem,
 				quantity: existingItem.quantity + 1
 			}
+
 			// update index of existing item with incremented quantity
 			updatedItems[existingCartItemIndex] = updatedItem;
+	
+			return {
+				...state, 
+				items: updatedItems
+			}
+
 		} else {
 			// add new item to new array
 			updatedItems.push({
@@ -43,11 +50,33 @@ function cartReducer(state, action){
 				items: updatedItems
 			}
 		}
-		
 	}
 
 	if (action.type === 'REMOVE_ITEM' ){
 		//... remove item from state
+		// if quantity > 1 reduce quantity; else remove entirely
+		const existingCartItemIndex = state.items.findIndex((item) => 
+			item.id === action.id
+		)
+
+		const existingCartItem = state.items[existingCartItemIndex];
+
+		// create new array
+		const updatedItems = [...state.items]
+
+		if(existingCartItem.quantity === 1){
+			
+			// will removed 1 item at that index
+			updatedItems.splice(existingCartItemIndex, 1);
+		} else {
+			const updatedItem = {
+				...existingCartItem,
+				quantity: existingCartItem.quantity - 1
+			}
+			updatedItems[existingCartItemIndex] = updatedItem
+		}
+
+		return {...state, items: updatedItems};
 	}
 
 	// return unchanged state if not action met
@@ -55,18 +84,35 @@ function cartReducer(state, action){
 }
 
 export function CartContextProvider({children}){
-	
 	// first param = pointer to reducer fx
 	// second param = init state value
-	useReducer(cartReducer, {
+	const [cart, dispatchCartAction] = useReducer(cartReducer, {
 		items: []
 	})
 
+	function addItem(item){
+		dispatchCartAction({
+			type: 'ADD_ITEM',
+			item: item
+		})
+	};
+
+	function removeItem(id){
+		dispatchCartAction({
+			type: 'REMOVE_ITEM',
+			id: id
+		})
+	};
+
+	const cartContext = {
+		items: cart.items,
+		addItem: addItem,
+		removeItem: removeItem
+	}
+
 	return (
-		<CartContext>
+		<CartContext value={cartContext}>
 			{children}
 		</CartContext>
 	)
 }
-
-export default CartContext;
