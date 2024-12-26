@@ -18,7 +18,7 @@ function Checkout(){
 	const { items, clearCart } = use(CartContext)
 	const { progress, hideCheckout } = use(UserProgressContext)
 
-	const {data, isLoading: isSending, error, sendRequest}  = 
+	const {data, isLoading: isSending, error, sendRequest, clearData}  = 
 		useHttp('http://localhost:3000/orders', requestConfig);
 
 	const cartTotal = items.reduce((totalPrice, item) => 
@@ -32,17 +32,13 @@ function Checkout(){
 	function handleCheckoutFinish(){
 		hideCheckout();
 		clearCart();
+		clearData();
 	}
 
-	function handleFormSubmit(event){
-		event.preventDefault();
-
-		const fd = new FormData(event.target);
-
-		// returns {name: entered name}
+	async function checkoutAction(fd){
 		const customerData = Object.fromEntries(fd.entries());
 		
-		sendRequest(JSON.stringify({
+		await sendRequest(JSON.stringify({
 				order: {
 					items: items,
 					customer: customerData
@@ -79,7 +75,7 @@ function Checkout(){
 		<Modal 
 			open={progress === 'checkout'}
 			onClose={handleCheckoutClose}>
-			<form onSubmit={handleFormSubmit}>
+			<form action={checkoutAction}>
 				<h2>Checkout</h2>
 				<Input 
 					labelText="Full Name"
