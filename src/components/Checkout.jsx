@@ -5,10 +5,21 @@ import Input from "./UI/Input";
 import Button from "./UI/Button";
 import { currencyFormatter } from "../util/formatting";
 import { UserProgressContext } from "../store/UserProgressContext";
+import useHttp from "../hooks/useHttp";
+
+const requestConfig = {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json'
+	}
+}
 
 function Checkout(){
-	const { items } = use(CartContext)
+	const { items, clearCart } = use(CartContext)
 	const { progress, hideCheckout } = use(UserProgressContext)
+
+	const {data, isLoading: isSending, error, sendRequest}  = 
+		useHttp('http://localhost:3000/orders', requestConfig);
 
 	const cartTotal = items.reduce((totalPrice, item) => 
 		totalPrice + item.price * item.quantity, 0
@@ -18,6 +29,11 @@ function Checkout(){
 		hideCheckout();
 	}
 
+	function handleCheckoutFinish(){
+		hideCheckout();
+		clearCart();
+	}
+
 	function handleFormSubmit(event){
 		event.preventDefault();
 
@@ -25,19 +41,38 @@ function Checkout(){
 
 		// returns {name: entered name}
 		const customerData = Object.fromEntries(fd.entries());
-
-		const response = fetch('http://localhost:3000/orders', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
+		
+		sendRequest(JSON.stringify({
 				order: {
 					items: items,
 					customer: customerData
 				}
-			})
-		})
+		}));
+	}
+
+	let actions = <>
+		<Button 
+			type="button" 
+			textOnly
+			onClick={handleCheckoutClose}>
+			Close
+		</Button>
+		<Button>Submit Order</Button>
+	</>
+
+	if (isSending) {
+		actions = <span>Sending Order Data...</span>
+	}
+
+	if (data && !error){
+		return <Modal open={progress === 'checkout'} onClose={handleCheckoutFinish}>
+			<h2>Success!</h2>
+			<p>Youre order was submitted successfully.</p>
+			<p>We will get back to you with more details via email within the next few minutes</p>
+			<p className='modal-actions'>
+				<Button onClick={handleCheckoutFinish}>Okay</Button>
+			</p>
+		</Modal>
 	}
 	
 	return (
@@ -75,13 +110,7 @@ function Checkout(){
 				</div>
 				<p>Total Amount: {currencyFormatter.format(cartTotal)} </p>
 				<p className='modal-actions'>
-					<Button 
-						type="button" 
-						textOnly
-						onClick={handleCheckoutClose}>
-							Close
-					</Button>
-					<Button>Submit Order</Button>
+					{actions}
 				</p>
 			</form>
 		</Modal>
